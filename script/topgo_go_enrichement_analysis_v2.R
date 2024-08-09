@@ -7,10 +7,9 @@ library(circlize)
 library(ComplexHeatmap)
 library(dplyr)
 library(stringr)
-
 ######################################
 
-go_analysis <- function(b2g, cluster_directory, algo = "weight01", subGO = "BP", cutoffpvalue = 0.05, organism_name = "sample", cutoffclusterterms = 50){
+top_go_analysis <- function(b2g, cluster_directory, algo = "weight01", subGO = "BP", cutoffpvalue = 0.05, organism_name = "sample", cutoffclusterterms = 50){
   
   #### Create TERM2GENE data frame ####
   genome_path <- b2g
@@ -37,8 +36,7 @@ go_analysis <- function(b2g, cluster_directory, algo = "weight01", subGO = "BP",
   ###################################
   
   #### Create cluster large list (all_cluster_sequences) which maps cluster name to list of genes ####
-  
-  ### Read a txt file and return all seq
+  # Read a txt file and return all seq #
   ls_gene_cluster <- function(path){
     cluster_genes <- read_lines(path)
     
@@ -161,11 +159,11 @@ go_analysis <- function(b2g, cluster_directory, algo = "weight01", subGO = "BP",
 }
 
 
-go_analysis(b2g = "/enadisk/maison/morlon/stage/data/raw/strigamia-acuminata.b2g.reformated.annot", # input b2g.reformated.annot file
+top_go_analysis(b2g = "/enadisk/maison/morlon/stage/data/raw/strigamia-acuminata.b2g.reformated.annot", # input b2g.reformated.annot file
             cluster_directory = "/enadisk/maison/morlon/stage/data/raw/clusters/",                  # input clusters directory (contains .txt)
             algo = "weight01",                                                                      # choose topGO algorithm (classic, elim, weight, weight01 (default),...)
             subGO = "BP",                                                                           # choose GO sub-ontology for enrichment analysis
             cutoffpvalue = 0.005,                                                                   # define pvalue cutoff 
-            organism_name = "Strigamia Acuminata",                                                   # define organism/sample name for final heatmap
+            organism_name = "Strigamia Acuminata",                                                  # define organism/sample name for final heatmap
             cutoffclusterterms = 50
             )

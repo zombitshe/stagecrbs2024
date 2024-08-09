@@ -2,6 +2,7 @@ library(clusterProfiler)
 library(dplyr)
 library(cowplot)
 
+#### load rds and combine into a list ####
 #load each cluster results
 clusterA <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterA.rds")
 clusterB <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterB.rds")
@@ -28,6 +29,9 @@ enrich_results_list <- list(clusterA,
 enrich_results_list_names <- c('clusterA','clusterB','clusterC','clusterC1','clusterC2','clusterD','clusterE','clusterF','clusterG','clusterH')
 
 enrich_results_list <- setNames(enrich_results_list, enrich_results_list_names)
+
+##########################################
+
 
 #define pbar function
 pbar <- function(x) {

@@ -2,34 +2,28 @@ library(clusterProfiler)
 library(dplyr)
 library(cowplot)
 
-#load each cluster results
-clusterA <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterA.rds")
-clusterB <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterB.rds")
-clusterC <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterC.rds")
-clusterC1 <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterC1.rds")
-clusterC2 <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterC2.rds")
-clusterD <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterD.rds")
-clusterE <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterE.rds")
-clusterF <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterF.rds")
-clusterG <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterG.rds")
-clusterH <- readRDS("/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/GO_analysis_s_acuminata_gene_clusterH.rds")
+compare_cluster <- function(rds_folder, result_folder){
+#### load rds and combine into a list ####
+# Set the folder path where the .rds files are located
+folder_path <- rds_folder
 
-#combine results into list
-enrich_results_list <- list(clusterA,
-                            clusterB, 
-                            clusterC, 
-                            clusterC1,
-                            clusterC2,
-                            clusterD,
-                            clusterE,
-                            clusterF,
-                            clusterG,
-                            clusterH)
-enrich_results_list_names <- c('clusterA','clusterB','clusterC','clusterC1','clusterC2','clusterD','clusterE','clusterF','clusterG','clusterH')
+# Get the list of .rds files in the folder
+file_list <- list.files(path = folder_path, pattern = "\\.rds$", full.names = TRUE)
 
-enrich_results_list <- setNames(enrich_results_list, enrich_results_list_names)
+# Initialize an empty list to store the enrich results
+enrich_results_list <- list()
 
+# Read and name the enrich results for each .rds file
+for (file in file_list) {
+  # Extract the cluster name from the file name
+  cluster_name <- gsub(".*/|\\.rds", "", file)
+  
+  # Read the .rds file and assign it to the corresponding cluster name
+  enrich_results_list[[cluster_name]] <- readRDS(file)
+}
+##########################################
 
+#### extract data and create compareClusterobject ####
 # Function to extract data from each enrichResult
 extract_enrich_data <- function(enrich_result, group_name) {
   data <- enrich_result@result
@@ -51,16 +45,18 @@ gene_clusters <- lapply(enrich_results_list, function(x) unique(unlist(strsplit(
 comparison_result <- new("compareClusterResult", 
                          compareClusterResult = all_data,
                          geneClusters = gene_clusters)
+##########################################
 
-# Now save dotplot
-pdf(file = "/enadisk/maison/morlon/stage/results/compare_cluster/compare_cluster_dotplot.pdf", 
+#### run desired analysis ####
+### DOTPLOT ###
+pdf(file = paste(result_folder, "compare_cluster_dotplot.pdf"), 
     width = 13,
     height = 25)
 dotplot(comparison_result)
 dev.off()
 
-# Now save cnetplot
-pdf(file = "/enadisk/maison/morlon/stage/results/compare_cluster/compare_cluster_cnetplot.pdf", 
+### CNETPLOT ###
+pdf(file = paste(result_folder, "compare_cluster_cnetplot.pdf"), 
     width = 30,
     height = 30)
 cnetplot(comparison_result, 
@@ -70,7 +66,7 @@ cnetplot(comparison_result,
          layout = "kk")
 dev.off()
 
-### P-VALUES PLOT ##
+### P-VALUES PLOT ###
 #define pbar function
 pbar <- function(x) {
   pi=seq(0, 1, length.out=11)
@@ -89,8 +85,13 @@ pbar <- function(x) {
 p_list <- lapply(enrich_results_list, pbar)
 
 # save all pbar results
-pdf(file = "/enadisk/maison/morlon/stage/results/compare_cluster/clusters_pvalue_distribution.pdf", 
+pdf(file = paste(result_folder, "clusters_pvalue_distribution.pdf"), 
     width = 15,
     height = 15)
 cowplot::plot_grid(plotlist = p_list, ncol = 2, labels = names(enrich_results_list), label_x = 0.5)
 dev.off()
+}
+##########################################
+
+compare_cluster(rds_folder = "/enadisk/maison/morlon/stage/results/go_enrichment_analysis_v2/",
+result_folder = "/enadisk/maison/morlon/stage/results/compare_cluster/")
